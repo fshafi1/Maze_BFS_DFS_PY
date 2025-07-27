@@ -10,6 +10,13 @@ class Node():
         self.action = action
         self.parent = parent
 
+    def get_state(self):
+        return self.state
+    def get_action(self):
+        return self.action
+    def get_parent(self):
+        return self.parent   
+
 class StackFrontier():
     def __init__(self):
         self.frontier = []
@@ -49,7 +56,7 @@ class Maze():
 
                for i, row in enumerate(self.content.split('\n')):
                    wall_row  = []
-                   for j, col in enumerate(row):
+                   for j in range(len(row)):
                        if self.content.split('\n')[i][j] == "S":
                             self.start = (i, j)
                             wall_row.append(True)
@@ -60,11 +67,58 @@ class Maze():
                             wall_row.append(True)
                        else:
                             wall_row.append(False)
-                       self.is_wall.append(wall_row)
-            
+                   self.is_wall.append(wall_row)
+
+     def actions(self, node):
+         current_row, current_col = node.get_state()
+         values = []
+         for i, row in enumerate(self.content.split('\n')):
+             for j in range(len(row)):
+                 if i == current_row and j == current_col:
+                    if (i - 1) >= 0 and not (self.is_wall[i - 1][j]):
+                        values.append((("up", (i - 1, j)), node))
+                    if (i + 1) < len(self.content.split('\n')) and not (self.is_wall[i + 1][j]):
+                        values.append((("down", (i + 1, j)), node)) 
+                    if (j + 1) < len(row) and not (self.is_wall[i][j + 1]):                 
+                        values.append((("right", (i, j + 1)), node))
+                    if (j - 1) >= 0 and not (self.is_wall[i][j - 1]):
+                        values.append((("left", (i, j - 1)), node))
+         print(self.is_wall[13])
+         return values
+     
+     def solve(self, algo):
+         start_node = Node(self.start, None, None)
+         stop_node = Node(self.start, None, None)
+         explored = []
+
+         if algo == "dfs":
+             frontier = StackFrontier()
+         else:
+             frontier = QueueFrontier()
+        
+         #start by adding start_node to frontier
+         frontier.add(start_node)
+
+         while True:
+             if not frontier:
+                raise Exception("Ops! no solution I guess")
+             else:
+                current_node = frontier.remove()
+                if current_node.get_state() == self.stop:
+                    print("Hurray! We have found path to your stop")
+                    break
+                else:
+                    actions = self.actions(current_node)
+
+                    # Current node will be appended to explored list
+                    explored.append(actions[0][1])
+                    print(current_node)
+                    print(actions[0][1] == current_node)
+                    break
 
 if __name__ == "__main__":
     mymaze = Maze('./assets/maze.txt')
+    mymaze.solve('dfs')
 
 
     
