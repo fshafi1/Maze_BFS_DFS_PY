@@ -104,20 +104,31 @@ class Maze():
 
          while frontier.frontier:
             current_node = frontier.remove()
+            #print(i, current_node)
+            print(frontier.frontier)
+            print(explored)
+            print(f"\n\n{'*'*50}\n\n")
             if current_node.get_state() == self.stop:
                 print("Hurray! We have found path to your stop")
                 break
             else:
                 actions = self.actions(current_node)
+                for action in actions:
+                    print(action)
                 # Current node will be appended to explored list
                 explored.append(current_node)
+                print(frontier.frontier)
+                print(explored)
+                '''
+           
                 for action in actions:
                     # To be removed
                     #print(action[0], action[0][0], action[0][1], action[1])
-                    node = Node(action[0][1], action[0], action[1])
-                    print(node.get_state(), node.get_actions(), node.get_parent(), node)
-                    if node not in explored and node not in frontier.frontier:
+                    if action[0][1] not in [node.get_state() for node in explored] and action[0][1] not in [node.get_state() for node in frontier.frontier]:
+                        node = Node(action[0][1], action[0], action[1])
                         frontier.add(node)
+                 '''
+
 
 if __name__ == "__main__":
     mymaze = Maze('./assets/maze.txt')
