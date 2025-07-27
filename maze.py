@@ -5,15 +5,19 @@ Description: This python code will solve a maze problem using states, BFS and DF
 '''
 
 class Node():
-    def __init__(self, state, action, parent):
+    def __init__(self, state, actions, parent):
         self.state = state
-        self.action = action
+        self.actions = [] 
+        if actions:
+            self.actions.append(actions)
         self.parent = parent
 
     def get_state(self):
         return self.state
-    def get_action(self):
-        return self.action
+    def get_actions(self):
+        return self.actions
+    def set_actions(self, actions):
+        self.actions.append(actions)
     def get_parent(self):
         return self.parent   
 
@@ -83,12 +87,11 @@ class Maze():
                         values.append((("right", (i, j + 1)), node))
                     if (j - 1) >= 0 and not (self.is_wall[i][j - 1]):
                         values.append((("left", (i, j - 1)), node))
-         print(self.is_wall[13])
+         node.set_actions(values)
          return values
      
      def solve(self, algo):
          start_node = Node(self.start, None, None)
-         stop_node = Node(self.start, None, None)
          explored = []
 
          if algo == "dfs":
@@ -99,22 +102,22 @@ class Maze():
          #start by adding start_node to frontier
          frontier.add(start_node)
 
-         while True:
-             if not frontier:
-                raise Exception("Ops! no solution I guess")
-             else:
-                current_node = frontier.remove()
-                if current_node.get_state() == self.stop:
-                    print("Hurray! We have found path to your stop")
-                    break
-                else:
-                    actions = self.actions(current_node)
-
-                    # Current node will be appended to explored list
-                    explored.append(actions[0][1])
-                    print(current_node)
-                    print(actions[0][1] == current_node)
-                    break
+         while frontier.frontier:
+            current_node = frontier.remove()
+            if current_node.get_state() == self.stop:
+                print("Hurray! We have found path to your stop")
+                break
+            else:
+                actions = self.actions(current_node)
+                # Current node will be appended to explored list
+                explored.append(current_node)
+                for action in actions:
+                    # To be removed
+                    #print(action[0], action[0][0], action[0][1], action[1])
+                    node = Node(action[0][1], action[0], action[1])
+                    print(node.get_state(), node.get_actions(), node.get_parent(), node)
+                    if node not in explored and node not in frontier.frontier:
+                        frontier.add(node)
 
 if __name__ == "__main__":
     mymaze = Maze('./assets/maze.txt')
