@@ -4,6 +4,8 @@ Date: 07/27/2025
 Description: This python code will solve a maze problem using states, BFS and DFS
 '''
 
+import sys
+
 class Node():
     def __init__(self, state, actions, parent):
         self.state = state
@@ -66,7 +68,7 @@ class Maze():
                             wall_row.append(True)
                        elif self.content.split('\n')[i][j] == "E":
                             self.stop = (i, j)
-                            wall_row.append(True)
+                            wall_row.append(False)
                        elif self.content.split('\n')[i][j] == "#":
                             wall_row.append(True)
                        else:
@@ -93,6 +95,7 @@ class Maze():
      def solve(self, algo):
          start_node = Node(self.start, None, None)
          explored = []
+         self.solution = []
 
          if algo == "dfs":
              frontier = StackFrontier()
@@ -103,31 +106,41 @@ class Maze():
          frontier.add(start_node)
 
          while frontier.frontier:
-            current_node = frontier.remove()
-            #print(i, current_node)
-            print(frontier.frontier)
-            print(explored)
-            print(f"\n\n{'*'*50}\n\n")
-            if current_node.get_state() == self.stop:
-                print("Hurray! We have found path to your stop")
-                break
+            if not frontier.frontier:
+                raise Exception("Ops! no solution I must say")
             else:
-                actions = self.actions(current_node)
-                for action in actions:
-                    print(action)
-                # Current node will be appended to explored list
-                explored.append(current_node)
-                print(frontier.frontier)
-                print(explored)
-                '''
-           
-                for action in actions:
-                    # To be removed
-                    #print(action[0], action[0][0], action[0][1], action[1])
-                    if action[0][1] not in [node.get_state() for node in explored] and action[0][1] not in [node.get_state() for node in frontier.frontier]:
-                        node = Node(action[0][1], action[0], action[1])
-                        frontier.add(node)
-                 '''
+                current_node = frontier.remove()
+
+                if current_node.get_state()[0] == self.stop[0] and current_node.get_state()[1] == self.stop[1] :
+                    print("Hurray! We have found path to your stop")
+                    while current_node.get_parent():
+                        self.solution.append(current_node.get_state())
+                        current_node = current_node.get_parent()
+                    self.solution = self.solution[::-1]
+                    print(self.solution)
+                    sys.exit()
+                else:
+                    actions = self.actions(current_node)
+                    for action in actions:
+                        #print(action)
+                      
+                        if action[0][1] not in [node.get_state() for node in explored] and action[0][1] not in [node.get_state() for node in frontier.frontier]:
+                            node = Node(action[0][1], action[0], action[1])
+                            if action[0][1][0] == self.stop[0] and action[0][1][1] == self.stop[1]:
+                                print("Hurray! We have found path to your stop")
+                                while current_node.get_parent():
+                                    self.solution.append(current_node.get_state())
+                                    current_node = current_node.get_parent()
+                                self.solution = self.solution[::-1]
+                                print(self.solution)
+                                sys.exit()
+                            else:
+                                frontier.add(node)
+
+                    # Current node will be appended to explored list
+                    explored.append(current_node)
+                    #print(f'Frontier after: {frontier.frontier}')
+                    #print(f'Explored: {explored}\n')
 
 
 if __name__ == "__main__":
