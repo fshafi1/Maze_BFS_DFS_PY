@@ -40,6 +40,7 @@ class QueueFrontier(StackFrontier):
 
 class Maze():
      def __init__(self, filename):
+          self.solution = []
           with open(filename, 'rt') as fn:
                self.content = fn.read()
 
@@ -91,15 +92,36 @@ class Maze():
                         values.append((("left", (i, j - 1)), node))
          node.set_actions(values)
          return values
-     
+
+     def print_solution(self):
+        print(f'\n{"The Solution": ^50}\n')
+        solved_board = []
+        for i, row in enumerate(self.content.split('\n')):
+            side = []
+            for j, col in enumerate(row):
+                if (i, j) in self.solution:
+                    side.append('>')
+                else:
+                    side.append(col)
+            solved_board.append(side)
+
+        for line in solved_board:
+            print(*line)
+
+        print("\n") #just because
+                    
+ 
+        
      def solve(self, algo):
          start_node = Node(self.start, None, None)
          explored = []
-         self.solution = []
+
 
          if algo == "dfs":
              frontier = StackFrontier()
+             print('dfs')
          else:
+             print('bfs')
              frontier = QueueFrontier()
         
          #start by adding start_node to frontier
@@ -117,8 +139,8 @@ class Maze():
                         self.solution.append(current_node.get_state())
                         current_node = current_node.get_parent()
                     self.solution = self.solution[::-1]
-                    print(self.solution)
-                    sys.exit()
+                    self.print_solution()
+                    break
                 else:
                     actions = self.actions(current_node)
                     for action in actions:
@@ -132,20 +154,19 @@ class Maze():
                                     self.solution.append(current_node.get_state())
                                     current_node = current_node.get_parent()
                                 self.solution = self.solution[::-1]
-                                print(self.solution)
-                                sys.exit()
+                                self.print_solution()
+                                break
                             else:
                                 frontier.add(node)
-
-                    # Current node will be appended to explored list
                     explored.append(current_node)
-                    #print(f'Frontier after: {frontier.frontier}')
-                    #print(f'Explored: {explored}\n')
-
+    
 
 if __name__ == "__main__":
-    mymaze = Maze('./assets/maze.txt')
-    mymaze.solve('dfs')
+    board_DFS = Maze('./assets/maze.txt')
+    board_DFS.solve('dfs') #Depth First Search
+
+    board_BFS = Maze('./assets/maze.txt')
+    board_BFS.solve('bfs') #breadth First Search
 
 
     
