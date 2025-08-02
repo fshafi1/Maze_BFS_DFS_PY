@@ -4,6 +4,7 @@ Date: 07/27/2025
 Description: This python code will solve a maze problem using states, BFS and DFS
 '''
 
+from termcolor import colored
 import sys
 
 class Node():
@@ -54,7 +55,7 @@ class Maze():
                print(f'\n{"The board": ^50}\n')
                for line in self.content.split('\n'):
                    line = line.strip()
-                   print(*[x.replace('0', '-') for x in line])
+                   print(*[x.replace('0', '-').replace("#", '\u2588').replace("E", colored("E", "red")).replace("S", colored("S", "cyan")) for x in line])
             
                # Set various attributes of the Maze class
                self.height = len(self.content.split('\n'))
@@ -93,14 +94,25 @@ class Maze():
          node.set_actions(values)
          return values
 
-     def print_solution(self):
-        print(f'\n{"The Solution": ^50}\n')
+     def print_solution(self, algo):
+        print(f'\n{"The Solution - BFS": ^50}\n') if algo == 'bfs' else print(f'\n{"The Solution - DFS": ^50}\n')
         solved_board = []
         for i, row in enumerate(self.content.split('\n')):
+            #row = row.replace('0', ' ').replace("#", '\u2588').replace("E", colored("E", "red")).replace("S", colored("S", "cyan")) 
             side = []
             for j, col in enumerate(row):
                 if (i, j) in self.solution:
-                    side.append('>')
+                    side.append(colored('>', 'green'))
+                elif col == "0":
+                    side.append(" ")
+                elif col == "#":
+                    side.append('\u2588')
+                elif col == "E":
+                    side.append(colored("E", "red"))
+                elif col == "S":
+                    side.append(colored("S", "cyan"))
+                elif col == "#":
+                    side.append()
                 else:
                     side.append(col)
             solved_board.append(side)
@@ -119,9 +131,7 @@ class Maze():
 
          if algo == "dfs":
              frontier = StackFrontier()
-             print('dfs')
          else:
-             print('bfs')
              frontier = QueueFrontier()
         
          #start by adding start_node to frontier
@@ -133,40 +143,40 @@ class Maze():
             else:
                 current_node = frontier.remove()
 
-                if current_node.get_state()[0] == self.stop[0] and current_node.get_state()[1] == self.stop[1] :
-                    print("Hurray! We have found path to your stop")
-                    while current_node.get_parent():
-                        self.solution.append(current_node.get_state())
-                        current_node = current_node.get_parent()
-                    self.solution = self.solution[::-1]
-                    self.print_solution()
-                    break
-                else:
-                    actions = self.actions(current_node)
-                    for action in actions:
-                        #print(action)
-                      
-                        if action[0][1] not in [node.get_state() for node in explored] and action[0][1] not in [node.get_state() for node in frontier.frontier]:
-                            node = Node(action[0][1], action[0], action[1])
-                            if action[0][1][0] == self.stop[0] and action[0][1][1] == self.stop[1]:
-                                print("Hurray! We have found path to your stop")
-                                while current_node.get_parent():
-                                    self.solution.append(current_node.get_state())
-                                    current_node = current_node.get_parent()
-                                self.solution = self.solution[::-1]
-                                self.print_solution()
-                                break
-                            else:
-                                frontier.add(node)
-                    explored.append(current_node)
+                actions = self.actions(current_node)
+                for action in actions:
+                    #print(action)
+                    
+                    if action[0][1] not in [node.get_state() for node in explored] and action[0][1] not in [node.get_state() for node in frontier.frontier]:
+                        node = Node(action[0][1], action[0], action[1])
+                        if action[0][1][0] == self.stop[0] and action[0][1][1] == self.stop[1]:
+                            print("Hurray! We have found path to your stop")
+                            while current_node.get_parent():
+                                self.solution.append(current_node.get_state())
+                                current_node = current_node.get_parent()
+                            self.solution = self.solution[::-1]
+                            self.print_solution(algo)
+                            sys.exit()
+                        else:
+                            frontier.add(node)
+                explored.append(current_node)
     
 
 if __name__ == "__main__":
-    board_DFS = Maze('./assets/maze.txt')
-    board_DFS.solve('dfs') #Depth First Search
 
-    board_BFS = Maze('./assets/maze.txt')
-    board_BFS.solve('bfs') #breadth First Search
+    values =  ["bfs", "dfs", "1", '2']
+    
+    while True:
+        user_choice = input(colored(f"\n Select: \n\n\t1.dfs (For Depth First Search)  \n\n\t2. bfs (For breadth First Search)  \n\nEnter: ", 'green'))
+        if user_choice in values:
+            break
+
+    if user_choice == "dfs" or user_choice == 1:
+        board = Maze('./assets/maze.txt')
+        board.solve('dfs') #Depth First Search
+    else:
+        board_BFS = Maze('./assets/maze.txt')
+        board_BFS.solve('bfs') #breadth First Search
 
 
     
